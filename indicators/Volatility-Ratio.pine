@@ -1,0 +1,36 @@
+//@version=3
+// Author: Akash Sasikumar
+// Copyright: 2023.Akash sasikumar
+
+study("Volatility Ratio", shorttitle="VR")
+
+length = input(title="Length", type=integer, minval=1, defval=14)
+breakoutLevel = input(title="Breakout Level", type=float, minval=0, step=0.1, defval=0.5)
+
+_highest(length, start) =>
+    out = nz(high[start])
+    for i = start + 1 to length - 1
+        prev = nz(high[i])
+        out := out < prev ? prev : out
+    out
+
+_lowest(length, start) =>
+    out = nz(low[start])
+    for i = start + 1 to length - 1
+        prev = nz(low[i])
+        out := out > prev ? prev : out
+    out
+
+max = max(_highest(length, 1), close[length + 1])
+min = min(_lowest(length, 1), close[length + 1])
+
+vr = tr(true) / (max - min)
+
+vrColor = vr >= breakoutLevel ? #ff9800 : #3c78d8
+
+plot(vr, title="VR", color=vrColor, transp=0)
+
+hline(breakoutLevel, title="Breakout Level", linestyle=dotted)
+
+breakoutFillColor = vr >= breakoutLevel ? #ff9800 : color(white, 100)
+bgcolor(breakoutFillColor, transp=90)
